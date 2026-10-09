@@ -11,7 +11,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,61 +18,25 @@ fun ExpenseDashboardScreen(expenses: List<Expense>) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Expense Tracker") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                title = { Text("My Expense Tracker") }
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 1. Total Display (D1)
-            item {
-                TotalDisplayCard(expenses = expenses)
-            }
+            TotalDisplayCard(expenses = expenses)
 
             // 2. Spending by Category (D2)
-            item {
-                CategorySpendingSection(expenses = expenses)
-            }
+            CategorySpendingSection(expenses = expenses)
 
-            // 3. Recent Expenses Header & List (D3)
-            item {
-                Text(
-                    text = "Recent Expenses",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (expenses.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No expenses recorded yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            } else {
-                items(expenses, key = { it.id }) { expense ->
-                    ExpenseRow(expense = expense)
-                }
-            }
+            // 3. Recent Expenses List (D3)
+            RecentExpensesSection(expenses = expenses)
         }
     }
 }
@@ -84,17 +47,13 @@ fun TotalDisplayCard(expenses: List<Expense>) {
     val totalAmount = expenses.sumOf { it.amount }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "This Month's Total", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = String.format(Locale.getDefault(), "$%.2f", totalAmount),
+                text = "$$totalAmount",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -105,39 +64,36 @@ fun TotalDisplayCard(expenses: List<Expense>) {
 // 2. Category View Composable (D2)
 @Composable
 fun CategorySpendingSection(expenses: List<Expense>) {
-    val categoryTotals = expenses.groupBy { it.category }
-        .mapValues { entry -> entry.value.sumOf { it.amount } }
+    val categoryTotals = expenses.groupBy { it.category }.mapValues { entry -> entry.value.sumOf { it.amount } }
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Spending by Category",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            if (categoryTotals.isEmpty()) {
-                Text(
-                    text = "No category data available",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                categoryTotals.forEach { (category, amount) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = category, style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            text = String.format(Locale.getDefault(), "$%.2f", amount),
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = "Spending by Category", style = MaterialTheme.typography.titleMedium)
+            categoryTotals.forEach { (category, amount) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = category)
+                    Text(text = "$$amount", fontWeight = FontWeight.SemiBold)
                 }
+            }
+        }
+    }
+}
+
+// 3. Recent Expenses List Composable (D3)
+@Composable
+fun RecentExpensesSection(expenses: List<Expense>) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = "Recent Expenses", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(expenses) { expense ->
+                ExpenseRow(expense = expense)
             }
         }
     }
@@ -157,23 +113,14 @@ fun ExpenseRow(expense: Expense) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column {
                 Text(text = expense.category, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                if (!expense.remark.isNullOrBlank()) {
-                    Text(
-                        text = expense.remark,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
                 Text(text = expense.date, style = MaterialTheme.typography.bodySmall)
             }
-            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = String.format(Locale.getDefault(), "%s%.2f", expense.currency, expense.amount),
+                text = "${expense.currency}${expense.amount}",
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.primary
+                fontSize = 16.sp
             )
         }
     }
@@ -183,15 +130,11 @@ fun ExpenseRow(expense: Expense) {
 @Preview(showBackground = true)
 @Composable
 fun ExpenseRowPreview() {
-    MaterialTheme {
-        ExpenseRow(expense = Expense(1, 45.50, "$", "Food", "2026-10-01", "Lunch"))
-    }
+    ExpenseRow(expense = Expense(1, 45.50, "$", "Food", "2026-10-01", "Lunch"))
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DashboardPreview() {
-    MaterialTheme {
-        ExpenseDashboardScreen(expenses = sampleExpenses)
-    }
+    ExpenseDashboardScreen(expenses = sampleExpenses)
 }
