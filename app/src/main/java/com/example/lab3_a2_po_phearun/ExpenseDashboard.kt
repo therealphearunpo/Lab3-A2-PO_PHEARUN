@@ -1,8 +1,10 @@
 package com.example.lab3_a2_po_phearun
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,17 +67,27 @@ fun TotalDisplayCard(expenses: List<Expense>) {
 @Composable
 fun CategorySpendingSection(expenses: List<Expense>) {
     val categoryTotals = expenses.groupBy { it.category }.mapValues { entry -> entry.value.sumOf { it.amount } }
+    val maxTotal = categoryTotals.values.maxOrNull()?.toFloat() ?: 1f
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(text = "Spending by Category", style = MaterialTheme.typography.titleMedium)
             categoryTotals.forEach { (category, amount) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = category)
-                    Text(text = "$$amount", fontWeight = FontWeight.SemiBold)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = category)
+                        Text(text = "$$amount", fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth((amount.toFloat() / maxTotal).coerceIn(0.01f, 1f))
+                            .height(12.dp)
+                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(6.dp))
+                    )
                 }
             }
         }

@@ -12,42 +12,42 @@ data class Expense(
 val sampleExpenses = listOf(
     Expense(
         id = 1,
-        amount = 2.0,
-        currency = "$",
-        category = "Food",
-        date = "09-October-2026",
-        remark = "Breakfast"
-    ),
-    Expense(
-        id = 2,
-        amount = 1.5,
+        amount = 15.0,
         currency = "$",
         category = "Food",
         date = "09-October-2026",
         remark = "Lunch"
     ),
     Expense(
-        id = 3,
-        amount = 2.00,
+        id = 2,
+        amount = 5.0,
         currency = "$",
-        category = "Food",
+        category = "Transport",
         date = "09-October-2026",
-        remark = "Dinner"
+        remark = "Bus"
+    ),
+    Expense(
+        id = 3,
+        amount = 50.0,
+        currency = "$",
+        category = "Entertainment",
+        date = "10-October-2026",
+        remark = "Movies"
     ),
     Expense(
         id = 4,
-        amount = 1.0,
+        amount = 10.0,
         currency = "$",
         category = "Food",
-        date = "09-October-2026",
+        date = "11-October-2026",
         remark = "Snacks"
     ),
     Expense(
         id = 5,
-        amount = 1.0,
+        amount = 20.0,
         currency = "$",
-        category = "Food",
-        date = "09-October-2026",
-        remark = "Drink"
+        category = "Transport",
+        date = "11-October-2026",
+        remark = "Taxi"
     )
 )
